@@ -78,8 +78,25 @@ AWS環境の自動化はterraformを使って作成し、AnsibleでRailsアプ�
 - Forkしたリポジトリを自身のローカル環境にCloneしてください。  
     ![clone](/images/readme/clone.png)  
 
-- ```git switch -c dev```でdevという名前のブランチを切って作業してください。
-    ![git](/images/readme/gitswich.png)
+- ```git switch -c [your branch name]```でブランチを切って下記を編集して作業してください。
+    ```.circleci/config.yml```の下記の箇所を自身のブランチ名に書き換えて下さい。
+    ```yaml
+    - path-filtering/filter:
+          name: merge-updated-files
+          mapping: |
+            .circleci/.* run-circleci true
+          base-revision: dev  # 自身のブランチ名に変更してください。
+          config-path: .circleci/auto_deployment_config.yml
+          filters:
+            branches:
+              only:
+                # 自身のブランチ名に変更してください。
+                - dev　
+                
+    ```  
+      
+    もしブランチ名を```dev```にしてそのまま使う場合はコメント消してファイルに変更かけてください。  
+    もしくは後述で出てくるterraformの変数をオーバーライドする場合はこのファイルに変更がなくても大丈夫です。  
   
 - VScodeを使用する場合下記の拡張機能をインストールして有効化してください。  
     ![yaml](/images/readme/yaml.png)  
@@ -130,7 +147,7 @@ CircleCIの**ProjectSettings**に必要な環境変数を登録します。
   
   
 続いて同じ**projectSettings**から**Environment Variables → Add Environment Variable**から環境変数を追加していきます  
-下図のように6つの変数を登録します  
+下図のように7つの変数を登録します  
 ![add_env_var](/images/readme/add_env_var.png)  
   
 ```
@@ -163,6 +180,8 @@ TFSTATE_STORAGE
 ##### 6. terraformの変数を自身の環境用にオーバーライド(必要があれば)
 下記の```/terraform/environments/development/main.tf```の変数を指定することでオーバーライドできます。  
 オーバーライドしない場合default値で動作します。  
+my_ipを自身のローカルIPに変更して頂くのがよりセキュアでおすすめです。  
+```[0.0.0.0/0] → [<your local ip>/32]```  
 
 ```hcl
 provider "aws" {
@@ -270,9 +289,6 @@ module "storage" {
 }
 ```
 
-**```keypair_name```と```s3_bucket_name```の二つは変更必須です。**  
-  
-
 ##### 7. 変更をコミットしGitHubにPushする 
 手順6の変更を保存したら、commitをリモートリポジトリにpushします。
 CircleCIのダッシュボードで```terraform-plan```ワークフローが起動したか確認してください。
@@ -364,5 +380,3 @@ parameters:
 14. ライブコーディング（Ansible〜CircleCI）
 15. ライブコーディング（Ansible〜CircleCI）
 16. 現場へ出ていくにあたって必要な技術と知識
-
-

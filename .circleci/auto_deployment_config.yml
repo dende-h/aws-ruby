@@ -87,7 +87,7 @@ jobs:
           name: Terraform Destroy
           command: |
             cd ./terraform/environments/development
-            terraform init
+            terraform init -backend-config="bucket=${TFSTATE_STORAGE}"
             terraform destroy -auto-approve 
 
   # setup-ec2
@@ -292,8 +292,6 @@ workflows:
               only:
                 - main
 
-  # # when pipeline parameter, run-raisetech-sample-config is true, the
-  # # job is triggered.
   # sample-jobs:
   #   when: << pipeline.parameters.run-raisetech-sample-config >>
   #   jobs:
